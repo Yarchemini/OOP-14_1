@@ -1,0 +1,20 @@
+[
+  {
+    "name": "Смартфоны",
+    "description": "Популярные модели смартфонов",
+    "products": [
+      {
+        "name": "Samsung Galaxy S23 Ultra",
+        "description": "256GB, Серый",
+        "price": 180000.0,
+        "quantity": 5
+      },
+      {
+        "name": "Iphone 15 Pro",
+        "description": "128GB, Синий",
+        "price": 210000.0,
+        "quantity": 3
+      }
+    ]
+  }
+]

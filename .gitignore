@@ -1,0 +1,17 @@
+# Виртуальное окружение
+.venv/
+venv/
+ENV/
+
+# Кэш Python и линтеров
+__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Настройки PyCharm
+.idea/
+
+# Локальные файлы конфигурации (если появятся)
+.env
