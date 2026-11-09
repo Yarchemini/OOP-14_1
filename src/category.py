@@ -23,18 +23,18 @@ class Category:
                 self.add_product(product)
 
     def __str__(self) -> str:
-        """Строковое отображение категории с суммой всех штук товаров на складе."""
         total_quantity = sum(product.quantity for product in self.__products)
         return f"{self.name}, количество продуктов: {total_quantity} шт."
 
     def add_product(self, product: Product) -> None:
-        """Добавляет продукт в приватный список категории."""
+        """Добавляет продукт в приватный список категории с проверкой типа."""
+        if not isinstance(product, Product):
+            raise TypeError("Добавлять в категорию можно только товары или их наследников!")
         self.__products.append(product)
         Category.product_count += 1
 
     @property
     def products(self) -> str:
-        """Геттер, использующий строковое отображение продуктов."""
         result = ""
         for product in self.__products:
             result += f"{str(product)}\n"

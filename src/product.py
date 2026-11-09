@@ -16,16 +16,16 @@ class Product:
         self.quantity = quantity
 
     def __str__(self) -> str:
-        """Строковое отображение продукта."""
-        return f"{self.name}, {self.__price} руб. Остаток: {self.quantity} шт."
+        return f"{self.name}, {self.__price} [руб. Остаток: {self.quantity} шт.]"
 
     def __add__(self, other: Self) -> float:
-        """Сложение двух продуктов (общая стоимость товаров на складе)."""
+        """Сложение двух продуктов строго одного класса."""
+        if type(self) is not type(other):
+            raise TypeError("Можно складывать товары только одного класса!")
         return (self.__price * self.quantity) + (other.__price * other.quantity)
 
     @classmethod
     def new_product(cls, product_data: dict, current_products: list = None) -> Self:
-        """Создает объект Product из словаря. Если товар дублируется, объединяет их."""
         name = product_data["name"]
         description = product_data["description"]
         price = product_data["price"]
@@ -57,3 +57,30 @@ class Product:
                 return
 
         self.__price = new_price
+
+
+class Smartphone(Product):
+    """Класс-наследник для смартфонов."""
+
+    def __init__(
+        self, name: str, description: str, price: float, quantity: int,
+        efficiency: float, model: str, memory: int, color: str
+    ) -> None:
+        super().__init__(name, description, price, quantity)
+        self.efficiency = efficiency
+        self.model = model
+        self.memory = memory
+        self.color = color
+
+
+class LawnGrass(Product):
+    """Класс-наследник для газонной травы."""
+
+    def __init__(
+        self, name: str, description: str, price: float, quantity: int,
+        country: str, germination_period: str, color: str
+    ) -> None:
+        super().__init__(name, description, price, quantity)
+        self.country = country
+        self.germination_period = germination_period
+        self.color = color

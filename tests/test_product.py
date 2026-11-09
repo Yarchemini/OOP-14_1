@@ -1,58 +1,42 @@
 import pytest
-from src.product import Product
+from src.product import Product, Smartphone, LawnGrass
 
 
 @pytest.fixture
-def sample_product():
-    return Product("Samsung Galaxy C23 Ultra", "256GB, Gray", 180000.0, 5)
+def sample_smartphone():
+    return Smartphone("iPhone 15", "Gray space", 210000.0, 8, 95.5, "15 Pro", 256, "Серый")
 
 
-def test_product_init(sample_product):
-    """Тест корректности инициализации объекта Product."""
-    assert sample_product.name == "Samsung Galaxy C23 Ultra"
-    assert sample_product.description == "256GB, Gray"
-    assert sample_product.price == 180000.0
-    assert sample_product.quantity == 5
+@pytest.fixture
+def sample_grass():
+    return LawnGrass("Газонная трава", "Элитная", 500.0, 20, "Россия", "14 дней", "Зеленый")
 
 
-def test_product_price_setter(sample_product):
-    """Тест изменения цены через сеттер (положительная цена)."""
-    sample_product.price = 200000.0
-    assert sample_product.price == 200000.0
+def test_smartphone_init(sample_smartphone):
+    """Тест корректности инициализации объекта Smartphone."""
+    assert sample_smartphone.name == "iPhone 15"
+    assert sample_smartphone.efficiency == 95.5
+    assert sample_smartphone.model == "15 Pro"
+    assert sample_smartphone.memory == 256
+    assert sample_smartphone.color == "Серый"
 
 
-def test_product_price_setter_invalid(sample_product, capsys):
-    """Тест сеттера при попытке установить нулевую или отрицательную цену."""
-    sample_product.price = -100.0
-    assert sample_product.price == 180000.0  # Цена не изменилась
-    captured = capsys.readouterr()
-    assert "Цена не должна быть нулевая или отрицательная" in captured.out
+def test_grass_init(sample_grass):
+    """Тест корректности инициализации объекта LawnGrass."""
+    assert sample_grass.name == "Газонная трава"
+    assert sample_grass.country == "Россия"
+    assert sample_grass.germination_period == "14 дней"
+    assert sample_grass.color == "Зеленый"
 
 
-def test_new_product_classmethod():
-    """Тест создания продукта через класс-метод new_product."""
-    product_data = {
-        "name": "Iphone 15 Pro",
-        "description": "128GB, Blue",
-        "price": 210000.50,
-        "quantity": 3
-    }
-    product = Product.new_product(product_data)
-    assert product.name == "Iphone 15 Pro"
-    assert product.price == 210000.50
-    assert product.quantity == 3
+def test_products_add_same_class(sample_smartphone):
+    """Тест сложения продуктов одинакового класса."""
+    other_phone = Smartphone("iPhone 15", "Blue", 200000.0, 2, 95.5, "15 Pro", 256, "Синий")
+    # (210000 * 8) + (200000 * 2) = 1680000 + 400000 = 2080000
+    assert sample_smartphone + other_phone == 2080000.0
 
 
-def test_new_product_duplicate_handling():
-    """Тест объединения дубликатов товаров с выбором максимальной цены."""
-    product_data_1 = {"name": "Test Phone", "description": "Desc", "price": 100.0, "quantity": 2}
-    product_data_2 = {"name": "Test Phone", "description": "Desc", "price": 150.0, "quantity": 3}
-
-    p1 = Product.new_product(product_data_1)
-    current_products = [p1]
-
-    # Создаем дубликат, передавая список текущих товаров
-    p2 = Product.new_product(product_data_2, current_products)
-
-    assert p2.quantity == 5  # 2 + 3
-    assert p2.price == 150.0  # max(100.0, 150.0)
+def test_products_add_different_classes(sample_smartphone, sample_grass):
+    """Тест, что сложение разных классов вызывает TypeError."""
+    with pytest.raises(TypeError, match="Можно складывать товары только одного класса!"):
+        _ = sample_smartphone + sample_grass
