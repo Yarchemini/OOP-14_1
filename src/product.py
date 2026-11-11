@@ -1,8 +1,38 @@
+from abc import ABC, abstractmethod
 from typing import Self
 
 
-class Product:
-    """Класс для представления товара."""
+class MixinLog:
+    """Миксин для логирования создания объектов."""
+
+    def __init__(self, *args, **kwargs) -> None:
+        # Передаем управление дальше по цепочке MRO
+        super().__init__(*args, **kwargs)
+        # Выводим информацию о созданном объекте в консоль
+        print(f"{self.__class__.__name__}({', '.join([repr(v) for v in args])})")
+
+
+class BaseProduct(ABC):
+    """Базовый абстрактный класс для всех продуктов."""
+
+    @abstractmethod
+    def __init__(self, name: str, description: str, price: float, quantity: int) -> None:
+        self.name = name
+        self.description = description
+        self.price = price
+        self.quantity = quantity
+
+    @abstractmethod
+    def __str__(self) -> str:
+        pass
+
+    @abstractmethod
+    def __add__(self, other: Self) -> float:
+        pass
+
+
+class Product(MixinLog, BaseProduct):
+    """Класс для представления стандартного товара."""
 
     name: str
     description: str
@@ -14,12 +44,13 @@ class Product:
         self.description = description
         self.__price = price
         self.quantity = quantity
+        # Инициализируем миксин
+        super().__init__(name, description, price, quantity)
 
     def __str__(self) -> str:
-        return f"{self.name}, {self.__price} [руб. Остаток: {self.quantity} шт.]"
+        return f"{self.name}, {self.__price} руб. Остаток: {self.quantity} шт."
 
     def __add__(self, other: Self) -> float:
-        """Сложение двух продуктов строго одного класса."""
         if type(self) is not type(other):
             raise TypeError("Можно складывать товары только одного класса!")
         return (self.__price * self.quantity) + (other.__price * other.quantity)
@@ -60,27 +91,27 @@ class Product:
 
 
 class Smartphone(Product):
-    """Класс-наследник для смартфонов."""
+    """Класс-наследник для смартфонов. Наследуется строго от Product."""
 
     def __init__(
         self, name: str, description: str, price: float, quantity: int,
         efficiency: float, model: str, memory: int, color: str
     ) -> None:
-        super().__init__(name, description, price, quantity)
         self.efficiency = efficiency
         self.model = model
         self.memory = memory
         self.color = color
+        super().__init__(name, description, price, quantity)
 
 
 class LawnGrass(Product):
-    """Класс-наследник для газонной травы."""
+    """Класс-наследник для газонной травы. Наследуется строго от Product."""
 
     def __init__(
         self, name: str, description: str, price: float, quantity: int,
         country: str, germination_period: str, color: str
     ) -> None:
-        super().__init__(name, description, price, quantity)
         self.country = country
         self.germination_period = germination_period
         self.color = color
+        super().__init__(name, description, price, quantity)

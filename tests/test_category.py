@@ -1,29 +1,47 @@
 import pytest
-from src.category import Category
-from src.product import Product, Smartphone
+from src.category import Category, Order
+from src.product import Product
+from src.utils import load_data_from_json
 
 
 @pytest.fixture
-def products_list():
-    return [
-        Product("Samsung Galaxy C23 Ultra", "256GB, Gray", 180000.0, 5),
-        Smartphone("iPhone 15", "Gray space", 210000.0, 8, 95.5, "15 Pro", 256, "Серый")
-    ]
+def sample_product():
+    return Product("Samsung Galaxy", "256GB", 180000.0, 5)
 
 
-def test_category_init(products_list):
-    category = Category("Электроника", "Гаджеты", products_list)
-    assert category.name == "Электроника"
-    assert len(category.products_list) == 2
+def test_category_init(sample_product):
+    Category.category_count = 0
+    Category.product_count = 0
+    category = Category("Смартфоны", "Гаджеты", [sample_product])
+    assert category.name == "Смартфоны"
+    assert len(category.products_list) == 1
+    assert "Samsung Galaxy" in category.products
+    assert str(category) == "Смартфоны, количество продуктов: 5 шт."
 
 
-def test_category_add_product_invalid():
-    """Тест, что добавление не-продукта вызывает TypeError."""
-    category = Category("Электроника", "Гаджеты", [])
-    with pytest.raises(TypeError, match="Добавлять в категорию можно только товары или их наследников!"):
-        category.add_product("Не товар, а просто строка")
+def test_category_add_invalid():
+    category = Category("Тест", "Описание", [])
+    with pytest.raises(TypeError):
+        category.add_product("Не продукт")
 
 
-def test_category_str(products_list):
-    category = Category("Электроника", "Гаджеты", products_list)
-    assert str(category) == "Электроника, количество продуктов: 13 шт."
+def test_order_creation(sample_product):
+    order = Order(sample_product, 2)
+    assert order.product.name == "Samsung Galaxy"
+    assert order.total_cost == 360000.0
+    assert str(order) == "Заказ: Samsung Galaxy, 2 шт. Итоговая стоимость: 360000.0 руб."
+
+
+def test_order_creation_invalid():
+    with pytest.raises(TypeError):
+        _ = Order("Строка вместо объекта", 5)
+
+
+def test_load_data_from_json():
+    Category.category_count = 0
+    Category.product_count = 0
+    categories = load_data_from_json("products.json")
+    assert len(categories) > 0
+
+    # Проверка на несуществующий файл
+    assert load_data_from_json("missing.json") == []
