@@ -2,6 +2,14 @@ from abc import ABC, abstractmethod
 from src.product import Product
 
 
+class ZeroQuantityError(Exception):
+    """Пользовательское исключение при попытке добавить товар с нулевым количеством."""
+
+    def __init__(self, message: str = "Товар с нулевым количеством не может быть добавлен") -> None:
+        self.message = message
+        super().__init__(self.message)
+
+
 class BaseOrderCategory(ABC):
     """Абстрактный класс для сущностей заказа и категорий товаров."""
 
@@ -36,10 +44,29 @@ class Category(BaseOrderCategory):
         return f"{self.name}, количество продуктов: {total_quantity} шт."
 
     def add_product(self, product: Product) -> None:
+        """Добавляет продукт в категорию с полной обработкой исключений."""
         if not isinstance(product, Product):
             raise TypeError("Добавлять в категорию можно только товары или их наследников!")
-        self.__products.append(product)
-        Category.product_count += 1
+
+        try:
+            if product.quantity == 0:
+                raise ZeroQuantityError()
+        except ZeroQuantityError as e:
+            print(e)
+        else:
+            self.__products.append(product)
+            Category.product_count += 1
+            print("Товар успешно добавлен")
+        finally:
+            print("Обработка добавления товара завершена")
+
+    def middle_price(self) -> float:
+        """Подсчитывает средний ценник всех товаров категории."""
+        try:
+            total_price = sum(product.price for product in self.__products)
+            return total_price / len(self.__products)
+        except ZeroDivisionError:
+            return 0
 
     @property
     def products(self) -> str:
@@ -59,9 +86,24 @@ class Order(BaseOrderCategory):
     def __init__(self, product: Product, quantity: int) -> None:
         if not isinstance(product, Product):
             raise TypeError("В заказ можно добавить только реальный товар или его наследника!")
-        self.product = product
-        self.quantity = quantity
-        self.total_cost = product.price * quantity
+
+        try:
+            if product.quantity == 0 or quantity == 0:
+                raise ZeroQuantityError()
+        except ZeroQuantityError as e:
+            print(e)
+            self.product = None
+            self.quantity = 0
+            self.total_cost = 0
+        else:
+            self.product = product
+            self.quantity = quantity
+            self.total_cost = product.price * quantity
+            print("Товар успешно добавлен")
+        finally:
+            print("Обработка добавления товара завершена")
 
     def __str__(self) -> str:
+        if self.product is None:
+            return "Пустой или некорректный заказ"
         return f"Заказ: {self.product.name}, {self.quantity} шт. Итоговая стоимость: {self.total_cost} руб."

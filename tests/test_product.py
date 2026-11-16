@@ -52,3 +52,8 @@ def test_mixin_log_output(capsys):
     _ = Product("Тестовый Товар", "Описание", 500.0, 10)
     captured = capsys.readouterr()
     assert "Product" in captured.out
+
+def test_product_zero_quantity():
+    """Тест выброса ValueError при попытке создать товар с нулевым количеством."""
+    with pytest.raises(ValueError, match="Товар с нулевым количеством не может быть добавлен"):
+        Product("Бракованный товар", "Описание", 1000.0, 0)

@@ -45,3 +45,21 @@ def test_load_data_from_json():
 
     # Проверка на несуществующий файл
     assert load_data_from_json("missing.json") == []
+
+def test_category_middle_price(sample_product):
+    """Тест подсчета среднего ценника товаров в категории и для пустой категории."""
+    product2 = Product("Iphone 15", "Gray", 100000.0, 3)
+    category = Category("Смартфоны", "Гаджеты", [sample_product, product2])
+    assert category.middle_price() == 140000.0
+
+    empty_category = Category("Пустая", "Без товаров", [])
+    assert empty_category.middle_price() == 0
+
+
+def test_order_zero_quantity(sample_product, capsys):
+    """Тест обработки нулевого количества при создании заказа."""
+    order = Order(sample_product, 0)
+    captured = capsys.readouterr()
+    assert "Товар с нулевым количеством не может быть добавлен" in captured.out
+    assert "Обработка добавления товара завершена" in captured.out
+    assert str(order) == "Пустой или некорректный заказ"

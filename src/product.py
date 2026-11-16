@@ -6,10 +6,15 @@ class MixinLog:
     """Миксин для логирования создания объектов."""
 
     def __init__(self, *args, **kwargs) -> None:
-        # Передаем управление дальше по цепочке MRO
         super().__init__(*args, **kwargs)
-        # Выводим информацию о созданном объекте в консоль
         print(f"{self.__class__.__name__}({', '.join([repr(v) for v in args])})")
+
+    def __repr__(self) -> str:
+        props = []
+        for k, v in self.__dict__.items():
+            clean_key = k.split("__")[-1]
+            props.append(f"{clean_key}={repr(v)}")
+        return f"{self.__class__.__name__}({', '.join(props)})"
 
 
 class BaseProduct(ABC):
@@ -40,11 +45,13 @@ class Product(MixinLog, BaseProduct):
     quantity: int
 
     def __init__(self, name: str, description: str, price: float, quantity: int) -> None:
+        if quantity == 0:
+            raise ValueError("Товар с нулевым количеством не может быть добавлен")
+
         self.name = name
         self.description = description
         self.__price = price
         self.quantity = quantity
-        # Инициализируем миксин
         super().__init__(name, description, price, quantity)
 
     def __str__(self) -> str:
@@ -91,7 +98,7 @@ class Product(MixinLog, BaseProduct):
 
 
 class Smartphone(Product):
-    """Класс-наследник для смартфонов. Наследуется строго от Product."""
+    """Класс-наследник для смартфонов."""
 
     def __init__(
         self, name: str, description: str, price: float, quantity: int,
@@ -105,7 +112,7 @@ class Smartphone(Product):
 
 
 class LawnGrass(Product):
-    """Класс-наследник для газонной травы. Наследуется строго от Product."""
+    """Класс-наследник для газонной травы."""
 
     def __init__(
         self, name: str, description: str, price: float, quantity: int,
